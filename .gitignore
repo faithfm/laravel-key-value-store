@@ -5,3 +5,6 @@
 .env
 .phpunit.result.cache
 /composer.lock
+
+# OS-specific files
+.DS_Store

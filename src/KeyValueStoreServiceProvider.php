@@ -1,10 +1,10 @@
 <?php
 
-namespace QCod\Settings;
+namespace FaithFM\KeyValueStore;
 
 use Illuminate\Support\ServiceProvider;
 
-class SettingsServiceProvider extends ServiceProvider
+class KeyValueStoreServiceProvider extends ServiceProvider
 {
     /**
      * Perform post-registration booting of services.
@@ -29,10 +29,9 @@ class SettingsServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        // bind setting storage
+        // bind key value store class
         $this->app->bind(
-            'QCod\Settings\Setting\SettingStorage',
-            'QCod\Settings\Setting\SettingEloquentStorage'
+            'FaithFM\KeyValueStore\KeyValueStoreClass'
         );
     }
 }

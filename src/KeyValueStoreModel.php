@@ -1,14 +1,14 @@
 <?php
 
-namespace QCod\Settings\Setting;
+namespace FaithFM\KeyValueStore;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Setting extends Model
+class KeyValueStoreModel extends Model
 {
     protected $guarded = ['updated_at', 'id'];
 
-    protected $table = 'settings';
+    protected $table = 'key_value_store';
 
     public function scopeGroup($query, $groupName)
     {

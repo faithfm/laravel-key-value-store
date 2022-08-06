@@ -1,37 +1,30 @@
 {
-  "name": "qcod/laravel-settings",
-  "description": "Store key value pair in database as settings",
-  "homepage": "https://github.com/qcod/laravel-settings",
+  "name": "faithfm/laravel-key-value-store",
+  "description": "Store key value pair in database",
+  "homepage": "https://github.com/faithfm/laravel-key-value-store",
   "type": "library",
   "license": "MIT",
   "keywords": [
-    "qcod",
     "laravel",
-    "database settings",
-    "db settings",
+    "key-value store",
     "eloquent"
   ],
   "authors": [
     {
-      "name": "Mohd Saqueib Ansari",
-      "email": "saquibweb@gmail.com"
+      "name": "Michael Engelbrecht",
+      "email": "michaelndani@gmail.com"
     }
   ],
   "require": {
     "php": "^7.3|^8.0",
     "laravel/framework": "^6.0|^7.0|^8.0|^9.0"
   },
-  "require-dev": {
-    "orchestra/testbench": "4.*|5.*|6.*",
-    "mockery/mockery": "^0.9.4 || ~1.0",
-    "phpunit/phpunit": "^8.5"
-  },
   "autoload": {
     "classmap": [
       "src/migrations"
     ],
     "psr-4": {
-      "QCod\\Settings\\": "src/"
+      "FaithFM\\KeyValueStore\\": "src/"
     },
     "files": [
       "src/helpers.php"
@@ -39,20 +32,17 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "QCod\\Settings\\Tests\\": "tests/"
+      "FaithFM\\KeyValueStore\\Tests\\": "tests/"
     }
   },
   "extra": {
     "laravel": {
       "providers": [
-        "QCod\\Settings\\SettingsServiceProvider"
+        "FaithFM\\KeyValueStore\\KeyValueStoreServiceProvider"
       ],
       "aliases": {
-        "Settings": "QCod\\Settings\\Facade"
+        "KeyValueStore": "FaithFM\\KeyValueStore\\Facade"
       }
     }
-  },
-  "scripts": {
-    "test": "vendor/bin/phpunit"
   }
 }

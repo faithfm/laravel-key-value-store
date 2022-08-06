@@ -1,28 +1,32 @@
 <?php
 
-namespace QCod\Settings\Setting;
+namespace FaithFM\KeyValueStore;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Collection;
 
-class SettingEloquentStorage implements SettingStorage
+class KeyValueStoreClass
 {
     /**
      * Group name.
      *
      * @var string
      */
-    protected $settingsGroupName = 'default';
+    protected $kvGroupName = 'default';
 
     /**
      * Cache key.
      *
      * @var string
      */
-    protected $settingsCacheKey = 'app_settings';
+    protected $kvCacheKey = 'my_key';
 
     /**
-     * {@inheritdoc}
+     * Get all pairs from storage as key value pair.
+     *
+     * @param  bool  $fresh  ignore cached
+     * @return Collection
      */
     public function all($fresh = false)
     {
@@ -30,13 +34,18 @@ class SettingEloquentStorage implements SettingStorage
             return $this->modelQuery()->pluck('val', 'name');
         }
 
-        return Cache::rememberForever($this->getSettingsCacheKey(), function () {
+        return Cache::rememberForever($this->getKvCacheKey(), function () {
             return $this->modelQuery()->pluck('val', 'name');
         });
     }
 
     /**
-     * {@inheritdoc}
+     * Get a pair from storage by key.
+     *
+     * @param  string  $key
+     * @param  null  $default
+     * @param  bool  $fresh
+     * @return mixed
      */
     public function get($key, $default = null, $fresh = false)
     {
@@ -44,11 +53,15 @@ class SettingEloquentStorage implements SettingStorage
     }
 
     /**
-     * {@inheritdoc}
+     * Save a pair in storage.
+     *
+     * @param $key string|array
+     * @param $val string|mixed
+     * @return mixed
      */
     public function set($key, $val = null)
     {
-        // if its an array, batch save settings
+        // if its an array, batch save pairs
         if (is_array($key)) {
             foreach ($key as $name => $value) {
                 $this->set($name, $value);
@@ -57,14 +70,14 @@ class SettingEloquentStorage implements SettingStorage
             return true;
         }
 
-        $setting = $this->getSettingModel()->firstOrNew([
+        $pair = $this->getModel()->firstOrNew([
             'name' => $key,
-            'group' => $this->settingsGroupName,
+            'group' => $this->kvGroupName,
         ]);
 
-        $setting->val = $val;
-        $setting->group = $this->settingsGroupName;
-        $setting->save();
+        $pair->val = json_encode($val);
+        $pair->group = $this->kvGroupName;
+        $pair->save();
 
         $this->flushCache();
 
@@ -72,7 +85,10 @@ class SettingEloquentStorage implements SettingStorage
     }
 
     /**
-     * {@inheritdoc}
+     * Check if pair with key exists.
+     *
+     * @param $key
+     * @return bool
      */
     public function has($key)
     {
@@ -80,11 +96,14 @@ class SettingEloquentStorage implements SettingStorage
     }
 
     /**
-     * {@inheritdoc}
+     * Remove a pair from storage.
+     *
+     * @param $key
+     * @return mixed
      */
     public function remove($key)
     {
-        $deleted = $this->getSettingModel()->where('name', $key)->delete();
+        $deleted = $this->getModel()->where('name', $key)->delete();
 
         $this->flushCache();
 
@@ -92,31 +111,33 @@ class SettingEloquentStorage implements SettingStorage
     }
 
     /**
-     * {@inheritdoc}
+     * Flush cache.
+     *
+     * @return bool
      */
     public function flushCache()
     {
-        return Cache::forget($this->getSettingsCacheKey());
+        return Cache::forget($this->getKvCacheKey());
     }
 
     /**
-     * Get settings cache key.
+     * Get cache key.
      *
      * @return string
      */
-    protected function getSettingsCacheKey()
+    protected function getKvCacheKey()
     {
-        return $this->settingsCacheKey.'.'.$this->settingsGroupName;
+        return $this->kvCacheKey.'.'.$this->kvGroupName;
     }
 
     /**
-     * Get settings eloquent model.
+     * Get eloquent model.
      *
      * @return Builder
      */
-    protected function getSettingModel()
+    protected function getModel()
     {
-        return app('\QCod\Settings\Setting\Setting');
+        return app('\FaithFM\KeyValueStore\KeyValueStoreModel');
     }
 
     /**
@@ -126,18 +147,18 @@ class SettingEloquentStorage implements SettingStorage
      */
     protected function modelQuery()
     {
-        return $this->getSettingModel()->group($this->settingsGroupName);
+        return $this->getModel()->group($this->kvGroupName);
     }
 
     /**
-     * Set the group name for settings.
+     * Set the group name for pairs.
      *
      * @param  string  $groupName
      * @return $this
      */
     public function group($groupName)
     {
-        $this->settingsGroupName = $groupName;
+        $this->kvGroupName = $groupName;
 
         return $this;
     }

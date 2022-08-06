@@ -1,26 +1,26 @@
 <?php
 
-if (! function_exists('settings')) {
+if (! function_exists('key_value_store')) {
 
     /**
-     * Get app setting stored in db.
+     * Get app pair stored in db.
      *
      * @param $key
      * @param  null  $default
      * @return mixed
      */
-    function settings($key = null, $default = null)
+    function key_value_store($key = null, $default = null)
     {
-        $setting = app()->make('QCod\Settings\Setting\SettingStorage');
+        $kvsInstance = app()->make('FaithFM\KeyValueStore\KeyValueStoreClass');
 
         if (is_null($key)) {
-            return $setting;
+            return $kvsInstance;
         }
 
         if (is_array($key)) {
-            return $setting->set($key);
+            return $kvsInstance->set($key);
         }
 
-        return $setting->get($key, value($default));
+        return $kvsInstance->get($key, value($default));
     }
 }
