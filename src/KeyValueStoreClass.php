@@ -3,7 +3,6 @@
 namespace FaithFM\KeyValueStore;
 
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Collection;
 
 class KeyValueStoreClass
@@ -16,27 +15,13 @@ class KeyValueStoreClass
     protected $kvGroupName = 'default';
 
     /**
-     * Cache key.
-     *
-     * @var string
-     */
-    protected $kvCacheKey = 'my_key';
-
-    /**
      * Get all pairs from storage as key value pair.
      *
-     * @param  bool  $fresh  ignore cached
      * @return Collection
      */
-    public function all($fresh = false)
+    public function all()
     {
-        if ($fresh) {
-            return $this->modelQuery()->pluck('val', 'name');
-        }
-
-        return Cache::rememberForever($this->getKvCacheKey(), function () {
-            return $this->modelQuery()->pluck('val', 'name');
-        });
+        return $this->modelQuery()->pluck('val', 'name');
     }
 
     /**
@@ -44,12 +29,12 @@ class KeyValueStoreClass
      *
      * @param  string  $key
      * @param  null  $default
-     * @param  bool  $fresh
      * @return mixed
      */
-    public function get($key, $default = null, $fresh = false)
+    public function get($key, $default = null)
     {
-        return $this->all($fresh)->get($key, $default);
+        $model = $this->getModel()->firstWhere('name', $key);
+        return $model->val ?? $default;
     }
 
     /**
@@ -79,8 +64,6 @@ class KeyValueStoreClass
         $pair->group = $this->kvGroupName;
         $pair->save();
 
-        $this->flushCache();
-
         return $val;
     }
 
@@ -92,7 +75,7 @@ class KeyValueStoreClass
      */
     public function has($key)
     {
-        return $this->all()->has($key);
+        return !is_null($this->get($key, null));
     }
 
     /**
@@ -105,29 +88,7 @@ class KeyValueStoreClass
     {
         $deleted = $this->getModel()->where('name', $key)->delete();
 
-        $this->flushCache();
-
         return $deleted;
-    }
-
-    /**
-     * Flush cache.
-     *
-     * @return bool
-     */
-    public function flushCache()
-    {
-        return Cache::forget($this->getKvCacheKey());
-    }
-
-    /**
-     * Get cache key.
-     *
-     * @return string
-     */
-    protected function getKvCacheKey()
-    {
-        return $this->kvCacheKey.'.'.$this->kvGroupName;
     }
 
     /**
