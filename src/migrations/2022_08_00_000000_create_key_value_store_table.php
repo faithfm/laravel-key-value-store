@@ -19,6 +19,8 @@ class CreateKeyValueStoreTable extends Migration
             $table->json('val')->nullable();
             $table->string('group')->default('default');
             $table->timestamps();
+
+            $table->unique(['group', 'name']);
         });
     }
 
